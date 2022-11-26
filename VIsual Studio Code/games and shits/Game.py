@@ -5,6 +5,7 @@ from sys import exit
 pygame.init()
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800,400))
+game_active = True
 
 #title,and font
 pygame.display.set_caption("Vinny goes to death row")
@@ -34,44 +35,52 @@ while True:
             pygame.quit()
             exit()
 
+        if game_active:
+            #onMousePress
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if player_rect.collidepoint(event.pos) and player_rect.bottom >=300:
+                    player_gravity = -20
 
-        #onMousePress
-        if event.type == pygame.MOUSEBUTTONDOWN:
-           if player_rect.collidepoint(event.pos) and player_rect.bottom >=300:
-                player_gravity = -20
+            #onKeyPress
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and player_rect.bottom >=300:
+                    player_gravity = -20
+        else:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                game_active = True
+                BadGuy_rect.x = 600
 
-        #onKeyPress
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and player_rect.bottom >=300:
-                player_gravity = -20
+
+    if game_active :
+        #Background Stuffs
+        screen.blit(sky_surface,(0,0))
+        screen.blit(ground,(0,300))
+
+        #score
+        pygame.draw.rect(screen,"#c0e8ec",Score_rect)
+        pygame.draw.rect(screen,"#c0e8ec",Score_rect,10)
+        screen.blit(Score_surf,Score_rect)
 
 
-    #Background Stuffs
-    screen.blit(sky_surface,(0,0))
-    screen.blit(ground,(0,300))
+        #BadGuy Stuffs
+        screen.blit(BadGuy,BadGuy_rect)
+        BadGuy_rect.x -=6
+        if BadGuy_rect.right <= 0: BadGuy_rect.left = 800
 
-    #score
-    pygame.draw.rect(screen,"#c0e8ec",Score_rect)
-    pygame.draw.rect(screen,"#c0e8ec",Score_rect,10)
-    screen.blit(Score_surf,Score_rect)
+        #Player Stuffs
+        player_gravity +=1
+        player_rect.y += player_gravity
+        if player_rect.bottom >=300: 
+            player_rect.bottom = 300
+        screen.blit(player,player_rect)
 
-    
-    #BadGuy Stuffs
-    screen.blit(BadGuy,BadGuy_rect)
-    BadGuy_rect.x -=4
-    if BadGuy_rect.right <= 0: BadGuy_rect.left = 800
-    
-    #Player Stuffs
-    player_gravity +=1
-    player_rect.y += player_gravity
-    if player_rect.bottom >=300: 
-        player_rect.bottom = 300
-    screen.blit(player,player_rect)
+        #collision
+        if BadGuy_rect.colliderect(player_rect):
+            game_active = False
 
-    #collision
-    if BadGuy_rect.colliderect(player_rect):
-        pygame.quit()
-        exit()
+    #intro/ menu screen
+    else:
+        screen.fill('Yellow')
 
     #other things that need to be there for the shit to run good
     pygame.display.update()
